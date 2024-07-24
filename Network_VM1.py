@@ -1,7 +1,6 @@
 import json
 import time
 import random
-from flask import Flask, request, jsonify
 import requests
 
 from Network_http1 import node_list
@@ -103,6 +102,10 @@ class Transaction_container() :
         self.transaction_hash = None
         return self.transaction
     
+    def change_transaction(self, new_transactionList) :
+        self.transaction_container = new_transactionList
+        return self.transaction_container
+
     def valid_transaction(self, recive_transaction) :
         valid_keys = ["sender", "recipient", "transaction_type", "transaction_data", "transaction_play"]
         for key in valid_keys:

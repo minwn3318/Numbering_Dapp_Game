@@ -1,8 +1,5 @@
-import hashlib 
-import json
 import time
 import random
-import math
 from Network_cyper1 import MerkleTree, hash
 from Network_VM1 import Smartcontract_container, Transaction_container, ExeSmartcontract
 
@@ -12,15 +9,27 @@ class Blockchain(object):
         self.chain = []                                   
         self.current_transactions = Transaction_container()
         self.current_smartcontracts = Smartcontract_container()
-        self.new_block(previous_hash='genesis_block', address = '0')          
+        genesisBlock = self.mine_block(previous_hash='genesis_block', address = '0')
+        self.push_block(genesisBlock)          
     
     @property
     def last_block(self):
-        return self.chain[-1]                             
-    
+        chain_list = []
+        chain_list.append(self.chain[-1])
+        return chain_list
+                                
+    @property
+    def all_chain(self) :
+        return self.chain
+
     @property
     def transaction(self):
-        return len(self.current_transaction)                                 
+        transaction_container = self.current_transaction.get_transaction_container()
+        return transaction_container                            
+
+    def chang_CurrentTran(self, new) :
+        list = self.current_transactions.change_transaction(new)
+        return list
 
     def pick_winner(self, candidate_list) :
         random.shuffle(candidate_list)
@@ -49,14 +58,10 @@ class Blockchain(object):
         
         return response
 
-    def new_chain(self, chain) :
-        self.chain = chain
-        return len(self.chain)
-
     def mine_block(self, previous_hash='0'):
         hash_smartcontracts = MerkleTree(self.current_smartcontracts.return_hashList())
         blockHeader = {
-            'index' : len(self.chain)+1,
+            'index' : len(self.chain),
             'timestamp' : time.time(),
             'previous_hash' : previous_hash or self.hash(self.chain[-1]['blockHash']),
             'transactions_hash' : self.current_transactions.get_transaction_hash(),
@@ -109,3 +114,4 @@ class Blockchain(object):
             
         return True
    
+blockchain = Blockchain()
