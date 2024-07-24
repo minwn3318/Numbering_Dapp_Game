@@ -4,15 +4,14 @@ import time
 import random
 import math
 from Network_cyper1 import MerkleTree, hash
-from Network_VM1 import Smartcontract, Transaction, VirualMachine
+from Network_VM1 import Smartcontract_container, Transaction_container, ExeSmartcontract
 
 class Blockchain(object):
     
     def __init__(self, name):
         self.chain = []                                   
-        self.current_transactions = Transaction()
-        self.current_smartcontracts = Smartcontract()
-        self.virtualMachine = VirualMachine(name) 
+        self.current_transactions = Transaction_container()
+        self.current_smartcontracts = Smartcontract_container()
         self.new_block(previous_hash='genesis_block', address = '0')          
     
     @property
@@ -38,7 +37,8 @@ class Blockchain(object):
             response = self.current_transactions.new_transaction(transaction)
             print(response)
         elif newer_transaction['transaction_type'] == "play" and "smartcontract" in newer_transaction: 
-            self.virtualMachine.ExeSmartcontract(self.current_smartcontracts, transaction)
+            response = ExeSmartcontract(self.current_smartcontracts, transaction)
+            print(response)
         elif newer_transaction['transaction_type'] == "register"  and "smartcontract" in newer_transaction:
             for smartcontract in self.current_smartcontracts.smartcontracts_list :
                 if not newer_transaction["smartcontract"]["smartcontract_type"] in smartcontract :
@@ -46,6 +46,8 @@ class Blockchain(object):
                     print(smartcontract_List)
                 response = self.current_smartcontracts.new_smartcontract(newer_transaction["smartcontract"])
                 print(response)
+        
+        return response
 
     def new_chain(self, chain) :
         self.chain = chain
@@ -62,7 +64,7 @@ class Blockchain(object):
         }
         raw_block = {
             'blockHeader' : blockHeader,
-            'blockData' : self.current_transactions.get_transaction(),
+            'blockData' : self.current_transactions.get_transaction_container(),
         }
         block = {
             'block' : raw_block,
@@ -88,7 +90,8 @@ class Blockchain(object):
         return True
 
     def push_block(self, new_block) :
-        self.valid_block(new_block, self.last_block)
+        if self.valid_block(new_block, self.last_block) == False :
+            return -1
         self.chain.append(new_block)
         self.current_transactions = self.current_transactions.reset_transaction_all()
         return len(self.chain)
